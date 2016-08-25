@@ -16,7 +16,8 @@ use POSIX qw(strftime);
 my $now_string = strftime "%Y%m%d-%H%M%S", gmtime;
 
 my %opts = (
-  'snapname' => { type => '=s', help => 'Snapshot name', required => 0},
+    'snapname'  => { type => '=s', help => 'Snapshot name', required => 0},
+    '_default_' => { argval => 'VM1 VM2 VMn',  type => '=s', required => 0},
   );
 
 # read/validate options and connect to the server
@@ -24,7 +25,12 @@ Opts::add_options(%opts);
 Opts::parse();
 Opts::validate();
 
-my %target_vms = map { $_ => 1 } @ARGV;
+# Stupid hack goes here because Opts doesn't handle '=s@' correctly
+my %target_vms = map { $_ => 1 } Opts::get_option('_default_') || @ARGV;
+unless (scalar keys %target_vms) {
+    Opts::usage;  exit;
+}
+
 my %found_vms  = ();
 
 my $default_snap_name = $ENV{USER}.'-'.$now_string;
