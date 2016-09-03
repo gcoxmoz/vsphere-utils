@@ -60,7 +60,7 @@ sub searchRules {
     foreach my $dsc_obj (@$pod_view) {
       my $clus_name = $dsc_obj->name;
       next unless ($dsc_obj->childEntity);
-      my $ds_obj = Vim::get_views(mo_ref_array => $dsc_obj->childEntity);
+      my $ds_obj = Vim::get_views(view_type => 'Datastore', mo_ref_array => $dsc_obj->childEntity);
       foreach my $ds (@{$ds_obj}) {
         $ds_to_cluster{$ds->name} = $clus_name;
         push(@{$cluster_to_ds{$clus_name}}, $ds->name);

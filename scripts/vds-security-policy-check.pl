@@ -39,7 +39,7 @@ sub check_all_DVSes {
 
       my $pg_refs = $dvs->get_property('portgroup');
       if (!(scalar @{$pg_refs})) { print "Found no portgroups in this VmwareDistributedVirtualSwitch.\n"; next; }
-      my $pgs = Vim::get_views(mo_ref_array => $pg_refs, );
+      my $pgs = Vim::get_views(view_type => 'DistributedVirtualPortgroup', mo_ref_array => $pg_refs, );
       foreach my $pg_ref (sort { lc($a->name) cmp lc($b->name) } @{$pgs}) {
           print '  '. $pg_ref->name;
           my $config = $pg_ref->config;  # DVPortgroupConfigInfo

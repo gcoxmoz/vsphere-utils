@@ -94,7 +94,7 @@ sub searchGroups {
         my $found_odds_group = 0;
         foreach my $group (sort { $a->name cmp $b->name } @hostgroups) {
             my $group_hosts_arrayref = $group->host;
-            my $host_ref = Vim::get_views(mo_ref_array => $group_hosts_arrayref, properties => ['name', ], );
+            my $host_ref = Vim::get_views(view_type => 'HostSystem', mo_ref_array => $group_hosts_arrayref, properties => ['name', ], );
             my @host_names = map { $_->name } @$host_ref;
             if ($group->name eq $vc_host_group_name) {
                 $found_vc_group = 1;
