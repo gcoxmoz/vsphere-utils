@@ -54,8 +54,8 @@ sub get_stats {
     my %metrics = map { $_ => 1 } @interesting_metrics;
 
     my @perfqueryspecs;
-    my $vms = Vim::find_entity_views(view_type => 'VirtualMachine', properties => [ 'name', 'runtime.powerState', ], filter => { 'runtime.powerState' => 'poweredOn' } );
-    #my $vms = Vim::find_entity_views(view_type => 'VirtualMachine', properties => [ 'name', 'runtime.powerState', ], filter => { 'name' => qr/^dev/ } ); # faster for testing
+    my $vms = Vim::find_entity_views(view_type => 'VirtualMachine', properties => [ 'name', 'runtime.powerState', 'config.hardware.device', ], filter => { 'runtime.powerState' => 'poweredOn' } );
+    #my $vms = Vim::find_entity_views(view_type => 'VirtualMachine', properties => [ 'name', 'runtime.powerState', 'config.hardware.device', ], filter => { 'name' => qr/^dev/ } ); # faster for testing
 
     foreach my $vm (@$vms) {
         our @metricIDs = ();
@@ -128,6 +128,30 @@ sub get_stats {
     my %results;
     foreach my $singleperfquery (sort {lc($a->entity->name) cmp lc($b->entity->name)} @perfqueryspecs) {
         my $vmname = $singleperfquery->entity->name;
+
+        my $device_ref = $singleperfquery->entity->{'config.hardware.device'};
+        # Might be a hack here, but everything sane seems to use scsi, so...
+        # Grab all the SCSI controllers first.
+        my %scsi;
+        foreach my $dev (@$device_ref) {
+            next unless ($dev->deviceInfo->label =~ m#SCSI controller (\d+)#);
+            $scsi{$dev->key} = 'scsi'.$1;
+        }
+
+        # Now grab all the disks and cobble together a namesake that resembles what
+        # we will eventually get back from our queries below.
+        # This is pretty hackish and works by luck; if the returns from queries
+        # change, this could go south very quickly.
+        my %disks;
+        foreach my $dev (@$device_ref) {
+            next unless ($dev->deviceInfo->label =~ m#Hard disk#);
+            $dev->backing->fileName =~ m#\[(.+)\]#;
+            my $backing_store = $1;
+            my $controller    = $scsi{$dev->controllerKey};
+            my $scsi_id       = $dev->unitNumber;
+            $disks{$controller.':'.$scsi_id} = $backing_store;
+        }
+
         # So, we're iterating over these specs one at a time, basically per-VM.
         # My attempts to do this as an array were thwarted:
         # 1) QueryPerf came back with no response when we went over about 500 VMs.
@@ -163,7 +187,7 @@ sub get_stats {
                 my $rollupType = $metricRef->rollupType->val;
 
                 my $internalID = $groupInfo . '.' . $nameInfo . '.' . $rollupType;
-                printf '%-'.$max_hostname_string.'s %-9s %-19s %6d'."\n", $vmname, $diskname, $nameInfo, $avg;
+                printf '%-'.$max_hostname_string.'s %-9s %-20s %-19s %6d'."\n", $vmname, $diskname, $disks{$diskname}, $nameInfo, $avg;
             }
         }
     }  # end of queryloop
