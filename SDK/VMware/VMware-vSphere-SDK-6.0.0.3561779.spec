@@ -7,11 +7,11 @@
 Summary:   A Perl SDK for interacting with VMware vSphere infrastructure
 Name:      VMware-vSphere
 Version:   6.0.0.3561779
-Release:   2%{dist}
+Release:   2%{?dist}
 License:   GPLv2+
 Group:     Applications/System
 Source:    VMware-vSphere-Perl-SDK-6.0.0-3561779.x86_64.tar.gz
-Patch0:    makefile.patch
+Patch0:    %{name}-makefile-%{release}.patch
 URL:       http://www.vmware.com
 BuildRoot: %(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 Vendor:    Mozilla IT
