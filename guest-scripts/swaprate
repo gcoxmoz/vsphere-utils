@@ -1,0 +1,28 @@
+#!/bin/sh
+
+#
+# gcox@mozilla
+#
+# Script to check for how much swap is thrashing on a particular VM.
+# Probably only good for linux because of the vmstat assumption.
+#
+
+TIMER=${1:-60}
+if ! [[ $TIMER =~ ^[0-9]+$ ]] ; then
+   echo "error: Need a positive number of seconds" >&2; exit 1
+elif [ $TIMER -gt 3600 ] ; then
+   echo "keep it sane, bucko" >&2; exit 1
+fi
+OLD_PAGES_SWAPPED_IN=`vmstat -s | grep 'pages swapped in' | awk '{print $1}'`
+OLD_PAGES_SWAPPED_OUT=`vmstat -s | grep 'pages swapped out' | awk '{print $1}'`
+sleep $TIMER
+NEW_PAGES_SWAPPED_IN=`vmstat -s | grep 'pages swapped in' | awk '{print $1}'`
+NEW_PAGES_SWAPPED_OUT=`vmstat -s | grep 'pages swapped out' | awk '{print $1}'`
+
+net_in=$((NEW_PAGES_SWAPPED_IN - OLD_PAGES_SWAPPED_IN))
+net_out=$((NEW_PAGES_SWAPPED_OUT - OLD_PAGES_SWAPPED_OUT))
+rate_in=`echo "scale=2; $net_in / $TIMER" | bc`
+rate_out=`echo "scale=2; $net_out / $TIMER" | bc`
+
+printf "IN  - %10i     (%10.2f)\n" $net_in $rate_in
+printf "OUT - %10i     (%10.2f)\n" $net_out $rate_out
