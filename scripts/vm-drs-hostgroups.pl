@@ -64,7 +64,7 @@ sub searchGroups {
 
     my $found_vc_group = 0;
 
-    foreach my $cluster_ref (@{$clusters_ref}) {
+    foreach my $cluster_ref (sort { $a->name cmp $b->name } @{$clusters_ref}) {
         print '# Cluster '.  $cluster_ref->name . "\n";
 
         my $hosts_ref = Vim::find_entity_views(view_type => 'HostSystem', begin_entity => $cluster_ref, properties => ['name', ], );
