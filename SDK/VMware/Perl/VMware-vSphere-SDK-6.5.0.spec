@@ -7,7 +7,7 @@
 Summary:   A Perl SDK for interacting with VMware vSphere infrastructure
 Name:      VMware-vSphere
 Version:   6.5.0.4566394
-Release:   1%{?dist}
+Release:   2%{?dist}
 License:   GPLv2+
 Group:     Applications/System
 # https://my.vmware.com/web/vmware/details?downloadGroup=VS-PERL-SDK65&productId=618
@@ -25,7 +25,7 @@ Summary:   A Perl SDK for interacting with VMware vSphere infrastructure
 Group:     Development/Libraries
 License:   GPLv2+
 Autoreq:   0
-Requires:  perl >= 5.008, perl-URI, perl-Crypt-SSLeay >= 0.51, perl-libwww-perl >= 5.8.05, perl-SOAP-Lite >= 0.67, perl-XML-LibXML >= 1.58
+Requires:  perl >= 5.008, perl-URI, perl-Crypt-SSLeay >= 0.51, perl-libwww-perl >= 5.8.05, perl-SOAP-Lite >= 0.67, perl-XML-LibXML >= 1.58, perl(LWP::Protocol::https)
 BuildRequires: perl >= 5.008, perl-ExtUtils-MakeMaker
 Prefix: %{perl_vendorlib}
 
