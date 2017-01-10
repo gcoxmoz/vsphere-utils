@@ -134,8 +134,8 @@ sub get_stats {
         # Grab all the SCSI controllers first.
         my %scsi;
         foreach my $dev (@$device_ref) {
-            next unless ($dev->deviceInfo->label =~ m#SCSI controller (\d+)#);
-            $scsi{$dev->key} = 'scsi'.$1;
+            next unless ($dev->deviceInfo->label =~ m#(SCSI|SATA|IDE)(?: controller)? (\d+)#);
+            $scsi{$dev->key} = lc($1).$2;
         }
 
         # Now grab all the disks and cobble together a namesake that resembles what
