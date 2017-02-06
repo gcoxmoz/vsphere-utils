@@ -114,7 +114,7 @@ sub searchRules {
           my $rule_name = $rule->name;
           if ($rule->isa('ClusterAntiAffinityRuleSpec')) {
             print "### Rule '$rule_name' is not enabled.\n" unless ($rule->enabled);
-            print "### Separation '$rule_name' doesn't end in 'separation'.\n" unless ($rule_name =~ m#separation(?: [-0-9]+)?$#);
+            print "### Separation '$rule_name' doesn't end in 'separation'.\n" unless ($rule_name =~ m#[Ss]eparation(?: [-0-9]+)?$#);
 
             my @vms = ();
             my %internal_overload_counter = (); # Strips this rule contains; ideally 1
@@ -247,7 +247,7 @@ sub searchRules {
       }
 
 
-      if (%evenodd_rules && %separation_rule_to_vm_map) {
+      if (%separation_rule_to_vm_map) {
         foreach my $separation_rule (sort keys %separation_rule_to_vm_map) {
           (my $rule = $separation_rule) =~ s# separation$##;
           next if ($evenodd_rules{$rule});
