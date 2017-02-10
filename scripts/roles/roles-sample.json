@@ -1,0 +1,24 @@
+{
+   "Non-VMadmin Sysadmins" : [
+      "baseline"
+   ],
+   "The night shift folks" : [
+      "baseline",
+      "host_maintmode",
+   ],
+   "That QA group that does snapshots" : [
+      "baseline",
+      "snapshots"
+   ],
+   "That group that does deploys" : [
+      "baseline",
+      "deploy_from_template",
+      "manage_templates",
+      "vm_lifecycle",
+      "vm_configs_full",
+      "vm_customizations"
+   ],
+   "VM Customizations" : [
+      "vm_customizations_root"
+   ]
+}

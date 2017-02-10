@@ -1,0 +1,178 @@
+{
+   "nonhuman_basics" : {
+      "comment" : "This is the basic hidden permissions",
+      "privs" : [
+         "System.Anonymous",
+         "System.Read",
+         "System.View"
+      ]
+   },
+   "baseline" : {
+      "comment" : "baseline is 'I trust everyone' level.  This is allowing someone as much power as if they had access to a physical version of the VM.  You might want to cull here.",
+      "privs" : [
+         "Datastore.Browse",
+         "System.Anonymous",
+         "System.Read",
+         "System.View",
+         "VApp.PowerOff",
+         "VApp.PowerOn",
+         "VirtualMachine.Config.Settings",
+         "VirtualMachine.Interact.AnswerQuestion",
+         "VirtualMachine.Interact.ConsoleInteract",
+         "VirtualMachine.Interact.DeviceConnection",
+         "VirtualMachine.Interact.PowerOff",
+         "VirtualMachine.Interact.PowerOn",
+         "VirtualMachine.Interact.Reset",
+         "VirtualMachine.Interact.SetCDMedia",
+         "VirtualMachine.Interact.ToolsInstall"
+      ]
+   },
+   "host_maintmode" : {
+      "comment" : "This is for the people we let touch the hosts.  Can't power cycle, but can maintmode until they can get a VM admin paged out",
+      "privs" : [
+         "Global.CancelTask",
+         "Host.Config.Maintenance"
+      ]
+   },
+   "change_portgroups" : {
+      "privs" : [
+         "Network.Assign",
+         "VirtualMachine.Config.EditDevice",
+         "VirtualMachine.Config.Settings"
+      ]
+   },
+   "datastore_writing" : {
+      "privs" : [
+         "Datastore.FileManagement"
+      ]
+   },
+   "deploy_from_template" : {
+      "privs" : [
+         "Datastore.AllocateSpace",
+         "Network.Assign",
+         "Resource.AssignVMToPool",
+         "VirtualMachine.Config.AddNewDisk",
+         "VirtualMachine.Inventory.CreateFromExisting",
+         "VirtualMachine.Provisioning.DeployTemplate"
+      ]
+   },
+   "manage_templates" : {
+      "privs" : [
+         "VirtualMachine.Provisioning.CloneTemplate",
+         "VirtualMachine.Provisioning.MarkAsTemplate",
+         "VirtualMachine.Provisioning.MarkAsVM"
+      ]
+   },
+   "netapp_vsc_backup" : {
+      "comment" : "https://library.netapp.com/ecm/ecm_get_file/ECMP12405921",
+      "privs" : [
+         "Datastore.Browse",
+         "nvpfVSC.BRGroup.Backup.com.netapp.nvpf.BackupNow",
+         "nvpfVSC.BRGroup.Backup.com.netapp.nvpf.BackupScheduled",
+         "nvpfVSC.BRGroup.Backup.com.netapp.nvpf.DeleteBackupJob",
+         "nvpfVSC.BRGroup.com.netapp.nvpf.Configure",
+         "nvpfVSC.VASAGroup.com.netapp.nvpf.VASAVPview",
+         "nvpfVSC.View",
+         "Task.Create",
+         "Task.Update",
+         "VirtualMachine.State.CreateSnapshot",
+         "VirtualMachine.State.RemoveSnapshot"
+      ]
+   },
+   "netapp_vsc_restore" : {
+      "comment" : "https://library.netapp.com/ecm/ecm_get_file/ECMP12405921",
+      "privs" : [
+         "Datastore.AllocateSpace",
+         "Datastore.Browse",
+         "Datastore.FileManagement",
+         "Datastore.Move",
+         "Datastore.Delete",
+         "Datastore.Rename",
+         "Host.Config.AdvancedConfig",
+         "Host.Config.Settings",
+         "Host.Config.Storage",
+         "Host.Config.Resources",
+         "Host.Local.CreateVM",
+         "Host.Local.DeleteVM",
+         "Host.Local.ReconfigVM",
+         "Host.Local.RelayoutSnapshots",
+         "nvpfVSC.BRGroup.Recovery.com.netapp.nvpf.MountUnMount",
+         "nvpfVSC.BRGroup.Recovery.com.netapp.nvpf.RecoverDatastore",
+         "nvpfVSC.BRGroup.Recovery.com.netapp.nvpf.RecoverVM",
+         "nvpfVSC.BRGroup.Recovery.com.netapp.nvpf.SingleFileRecovery",
+         "nvpfVSC.VASAGroup.com.netapp.nvpf.VASAVPview",
+         "nvpfVSC.View",
+         "Resource.ApplyRecommendation",
+         "Resource.AssignVMToPool",
+         "Resource.QueryVMotion",
+         "Task.Create",
+         "Task.Update",
+         "VirtualMachine.Config.AddExistingDisk",
+         "VirtualMachine.Config.AddNewDisk",
+         "VirtualMachine.Config.AdvancedConfig",
+         "VirtualMachine.Config.Resource",
+         "VirtualMachine.Config.ReloadFromPath",
+         "VirtualMachine.Config.RemoveDisk",
+         "VirtualMachine.Interact.PowerOff",
+         "VirtualMachine.Interact.PowerOn",
+         "VirtualMachine.Inventory.CreateFromExisting",
+         "VirtualMachine.Inventory.Move",
+         "VirtualMachine.Inventory.Register",
+         "VirtualMachine.Inventory.Delete",
+         "VirtualMachine.Inventory.Unregister",
+         "VirtualMachine.State.RemoveSnapshot",
+         "VirtualMachine.State.RevertToSnapshot"
+      ]
+   },
+   "snapshots" : {
+      "privs" : [
+         "VirtualMachine.State.CreateSnapshot",
+         "VirtualMachine.State.RemoveSnapshot",
+         "VirtualMachine.State.RenameSnapshot",
+         "VirtualMachine.State.RevertToSnapshot"
+      ]
+   },
+   "vm_configs_full" : {
+      "privs" : [
+         "VirtualMachine.Config.AddExistingDisk",
+         "VirtualMachine.Config.AddRemoveDevice",
+         "VirtualMachine.Config.AdvancedConfig",
+         "VirtualMachine.Config.Annotation",
+         "VirtualMachine.Config.CPUCount",
+         "VirtualMachine.Config.EditDevice",
+         "VirtualMachine.Config.Memory",
+         "VirtualMachine.Config.RemoveDisk",
+         "VirtualMachine.Config.Rename",
+         "VirtualMachine.Config.ResetGuestInfo",
+         "VirtualMachine.Config.Settings",
+         "VirtualMachine.Config.UpgradeVirtualHardware"
+      ]
+   },
+   "vm_configs_minimal" : {
+      "privs" : [
+         "VirtualMachine.Config.CPUCount",
+         "VirtualMachine.Config.Memory",
+         "VirtualMachine.Config.Resource",
+         "VirtualMachine.Config.Settings"
+      ]
+   },
+   "vm_customizations" : {
+      "comment" : "VirtualMachine.Provisioning.ModifyCustSpecs is needed, but at the root level, whereas these are down at the VM level, So I've made 2 privsets lest you have too much visibility to the wrong people",
+      "privs" : [
+         "VirtualMachine.Provisioning.Customize",
+         "VirtualMachine.Provisioning.ReadCustSpecs"
+      ]
+   },
+   "vm_customizations_root" : {
+      "privs" : [
+         "VirtualMachine.Provisioning.ModifyCustSpecs"
+      ]
+   },
+   "vm_lifecycle" : {
+      "privs" : [
+         "VirtualMachine.Inventory.Create",
+         "VirtualMachine.Inventory.Delete",
+         "VirtualMachine.Inventory.Move"
+      ]
+   }
+}
