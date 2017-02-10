@@ -20,7 +20,6 @@ $Util::script_version = '1.0';
 #
 
 my %opts = (
-  'clusterName'  => { type => '=s', help => 'Cluster name', required => 0},
   'cleanup-smvi' => { type => "",   help => 'Run an actual cleanup', required => 0},
   );
 

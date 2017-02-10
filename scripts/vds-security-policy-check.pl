@@ -16,7 +16,6 @@ $Util::script_version = '1.0';
 #
 
 my %opts = (
-  'clusterName' => { type => '=s', help => 'Cluster name', required => 0},
   );
 
 # read/validate options and connect to the server

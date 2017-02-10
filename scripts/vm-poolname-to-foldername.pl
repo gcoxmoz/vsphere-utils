@@ -16,7 +16,6 @@ $Util::script_version = '1.0';
 
 use JSON;
 my %opts = (
-    'clusterName' => { type => '=s', help => 'Cluster name', required => 0},
     'json'        => { type => '',   help => 'Export listing as JSON', required => 0},
     'audit'       => { type => '',   help => 'Print all mappings', required => 0},
   );
