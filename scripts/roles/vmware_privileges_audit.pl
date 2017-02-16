@@ -87,7 +87,6 @@ sub check_all_perms {
     }
 
     my $roles_ref = $authorizationManager->roleList;
-    my %roles_seen = ();
     foreach my $role (sort { $a->name cmp $b->name } @$roles_ref) {
         # we can't change 'em so why care?
         next if ($role->system);
@@ -100,6 +99,7 @@ sub check_all_perms {
         #    foreach my $priv (@{$role->privilege}) {
         #        print '  '.$priv."\n";
         #    }
+
         if (!Opts::get_option('audit')) {
             if (! $roles_in_use{$role->roleId}) {
                 print '### Unused role '. $role->name ."\n";
@@ -108,7 +108,6 @@ sub check_all_perms {
             next unless ($role->privilege); # If it's an empty privilege set, move on
         }
 
-        $roles_seen{$role->name} = 1;
         my $rolegroup_ref = $role_groupings{$role->name};
         if (!defined $rolegroup_ref) {
             print $role->name." has no definition in %role_groupings.  Raw dump:\n";
@@ -153,8 +152,8 @@ sub check_all_perms {
         }
     }
     my %unseen_roles = map { $_ => 1, } keys %role_groupings;
-    foreach my $k (keys %roles_seen) {
-        delete $unseen_roles{$k};
+    foreach my $k (@{$roles_ref}) {
+        delete $unseen_roles{$k->name};
     }
     if (scalar keys %unseen_roles) {
         print "### Did not find roles named:\n";
