@@ -87,7 +87,7 @@ sub check_all_perms {
     }
 
     my $roles_ref = $authorizationManager->roleList;
-    my %roles = ();
+    my %roles_seen = ();
     foreach my $role (sort { $a->name cmp $b->name } @$roles_ref) {
         # we can't change 'em so why care?
         next if ($role->system);
@@ -108,6 +108,7 @@ sub check_all_perms {
             next unless ($role->privilege); # If it's an empty privilege set, move on
         }
 
+        $roles_seen{$role->name} = 1;
         my $rolegroup_ref = $role_groupings{$role->name};
         if (!defined $rolegroup_ref) {
             print $role->name." has no definition in %role_groupings.  Raw dump:\n";
@@ -150,5 +151,13 @@ sub check_all_perms {
                 print '  '.$priv."\n";
             }
         }
+    }
+    my %unseen_roles = map { $_ => 1, } keys %role_groupings;
+    foreach my $k (keys %roles_seen) {
+        delete $unseen_roles{$k};
+    }
+    if (scalar keys %unseen_roles) {
+        print "### Did not find roles named:\n";
+        print('  '.join("\n  ", sort keys %unseen_roles)."\n");
     }
 }
