@@ -1,24 +1,41 @@
 {
-   "Non-VMadmin Sysadmins" : [
-      "baseline"
-   ],
-   "The night shift folks" : [
-      "baseline",
-      "host_maintmode",
-   ],
-   "That QA group that does snapshots" : [
-      "baseline",
-      "snapshots"
-   ],
-   "That group that does deploys" : [
-      "baseline",
-      "deploy_from_template",
-      "manage_templates",
-      "vm_lifecycle",
-      "vm_configs_full",
-      "vm_customizations"
-   ],
-   "VM Customizations" : [
-      "vm_customizations_root"
-   ]
+   "Non-VMadmin Sysadmins" : {
+      "privsets" : [
+         "baseline"
+      ]
+   },
+   "The night shift folks" : {
+      "privsets" : [
+         "baseline",
+         "host_maintmode",
+      ]
+   },
+   "That QA group that does snapshots" : {
+      "privsets" : [
+         "baseline",
+         "snapshots"
+      ]
+   },
+   "That group that does deploys" : {
+      "privsets" : [
+         "baseline",
+         "deploy_from_template",
+         "manage_templates",
+         "vm_lifecycle",
+         "vm_configs_full",
+         "vm_customizations"
+      ]
+   },
+   "VM Customizations" : {
+      "privsets" : [
+         "vm_customizations_root"
+      ]
+   }
+   "Vendor Thing" : {
+      "autocreated" : "role auto-installed by Acme Widgets Plugin Module",
+      "privsets" : [
+         "zzz_acme_plugin"
+      ]
+   },
+
 }

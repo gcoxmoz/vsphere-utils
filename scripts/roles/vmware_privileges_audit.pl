@@ -20,16 +20,14 @@ $Util::script_version = '1.0';
 # (namely, the set of privs necessary to do certain tasks) and put that in a
 # JSON file (so this script would become sharable and not muddied with privs).
 # The contents of privileges.json is that first mapping - tasks to permissions.
+# Things defined in here are "what it would take to do a certain job".  You can
+# have items in here that you don't use.
 #
 # Then the roles are a flattening of the things that we want particular roles
 # to do.  That mapping is roles.json, which is going to be proprietary per company.
 #
 # The script maps the desired permissions (from our JSON) into a list of perms,
 # and checks that against the actual privileges on the vCenter.
-#
-# You will probably want to tweak this to your local environment.  We have
-# exceptions coded in (e.g we don't care about NetApp VSC roles) that you may
-# wish to cull out.
 #
 
 use JSON;
@@ -93,31 +91,34 @@ sub check_all_perms {
         # The samples are deployed from VMware.  Let's ignore.
         next if ($role->info->label =~ m#\(sample\)$#); 
         next if ($role->info->label =~ m#^InventoryService.Tagging.TaggingAdmin$#);
-        # The VSC perms are created by NetApp.  Don't touch.
-        next if ($role->info->label =~ m#^VSC#);
         #    print $role->name."\n";
         #    foreach my $priv (@{$role->privilege}) {
         #        print '  '.$priv."\n";
         #    }
-
-        if (!Opts::get_option('audit')) {
-            if (! $roles_in_use{$role->roleId}) {
-                print '### Unused role '. $role->name ."\n";
-                next;
-            }
-            next unless ($role->privilege); # If it's an empty privilege set, move on
-        }
-
+        #
         my $rolegroup_ref = $role_groupings{$role->name};
         if (!defined $rolegroup_ref) {
-            print $role->name." has no definition in %role_groupings.  Raw dump:\n";
+            print $role->name." exists, but has no definition in %role_groupings.  Raw dump:\n";
             foreach my $priv (@{$role->privilege}) {
                 print '  '.$priv."\n";
             }
             next;
+        } elsif (! defined $rolegroup_ref->{'privsets'}) {
+            print $role->name." has an improper %role_groupings setup (no 'privsets' declared).\n";
+            next;
         }
+
+        if (!Opts::get_option('audit')) {
+            if (! $roles_in_use{$role->roleId} && !(defined($rolegroup_ref->{'autocreated'}) && $rolegroup_ref->{'autocreated'})) {
+                # If it's not in use, call it out since it's probably a glitch with us.
+                # Unless it's something flagged as autocreated (thus something some software slipped it in whether we want it or not).
+                print '### Unused role '. $role->name ."\n";
+            }
+            next unless ($role->privilege); # If it's an empty privilege set, move on
+        }
+
         my %privs_expected = ();
-        foreach my $group (@$rolegroup_ref) {
+        foreach my $group (@{$rolegroup_ref->{'privsets'}}) {
             my $privlist_ref = $privilege_groupings{$group};
             if (! defined $privlist_ref) {
                 print $role->name." is trying to use group $group, which isn't listed in \%privilege_groupings.  Aborting.\n";
@@ -157,6 +158,8 @@ sub check_all_perms {
     }
     if (scalar keys %unseen_roles) {
         print "### Did not find roles named:\n";
-        print('  '.join("\n  ", sort keys %unseen_roles)."\n");
+        foreach my $role (sort keys %unseen_roles) {
+            print '  ' . $role . (defined($role_groupings{$role}->{'autocreated'}) ? '  ('.$role_groupings{$role}->{'autocreated'}.')' : '') . "\n";
+        }
     }
 }
