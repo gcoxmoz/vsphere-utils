@@ -13,7 +13,9 @@ $Util::script_version = '1.0';
 # has perms, looking for discrepancies.  Dump it all, so it's grep'able/sortable/scanable.
 #
 
+use JSON;
 my %opts = (
+    'json' => { type => '',   help => 'Export listing as JSON', required => 0},
   );
 
 # read/validate options and connect to the server
@@ -23,6 +25,7 @@ Opts::validate();
 
 # connect to the server
 Util::connect(); #print "Server Connected\n";
+my @output = ();
 check_all_perms();
 # disconnect from the server
 Util::disconnect(); #print "Server Disconnected\n";
@@ -35,16 +38,27 @@ sub check_all_perms {
     my $roles_ref = $authorizationManager->roleList;
     my %roles = ();
     foreach my $role (@$roles_ref) {
-        $roles{$role->roleId} = ($role->system ? 'systemdefined-' : '').'"'. $role->name .'"';
+        $roles{$role->roleId} = $role->name;
     }
     my $perms = $authorizationManager->RetrieveAllPermissions();
     foreach my $perm_ref (@{$perms}) {
         my $entity = Vim::get_view(mo_ref => $perm_ref->entity, );
-        my $entity_type = ref($entity);
-        my $entity_name = $entity->name;
-        my $group  = $perm_ref->group ? 'Group=' : 'User=';
-        my $role   = $roles{$perm_ref->roleId} || 'UNDEF_ROLE';
-        my $propagation = $perm_ref->propagate ? '' : ' (NONPROPAGATING)';
-        print  $entity_type .' '. $entity_name .' '. $group . $perm_ref->principal .' '. $role . $propagation . "\n";
+        my $json = {};
+        $json->{'entity_type'}        = ref($entity);
+        $json->{'entity_name'}        = $entity->name;
+        $json->{'isa_group'}          = $perm_ref->group;
+        $json->{'principal'}          = $perm_ref->principal;
+        $json->{'role_name'}          = $roles{$perm_ref->roleId};
+        $json->{'propagation'}        = $perm_ref->propagate ? '' : '(NONPROPAGATING)';
+        my $json_blob; %{$json_blob} = %$json;
+        push @output, $json_blob;
+    }
+
+    if (Opts::get_option('json')) {
+        print to_json(\@output, {utf8 => 1, pretty => 1, canonical => 1, });
+    } else {
+        foreach my $ref (@output) {
+            print $ref->{'entity_type'} .' '. $ref->{'entity_name'} .' '. ($ref->{'isa_group'} ? 'Group=' : 'User=') . $ref->{'principal'} .' "'. $ref->{'role_name'} .'" '. $ref->{'propagation'} . "\n";
+        }
     }
 }
