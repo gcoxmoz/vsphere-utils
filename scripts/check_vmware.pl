@@ -4,7 +4,7 @@
 #
 # Check for vCenter alarms at the root
 # If nothing at the root, deepdive for ones that didn't propagate
-# 
+#
 # CAUTION!  This script assumes that you are at least ping-monitoring individual
 # ESX hosts.  Thus, IT SUPPRESSES ALARMS for powered-off hosts (reported
 # verbally in the status, but not flagged as critical) so as to avoid needing
@@ -74,7 +74,15 @@ sub analyze_one_entity ($$) {
                     set_final_status(1) if ($color eq 'yellow');
                     set_final_status(2) if ($color eq 'red');
                 }
-                $rv_ref = [$type, $aentity->name, $alarmname, $color, ];
+                if ($alarm->info->systemName eq 'alarm.ApplmgmtHealthAlarm') {
+                    # This is exceptionally awful, I'm sorry.  The 'Appliance Management Health Alarm' is one that can be
+                    # for a severe performance issue... or a pending software update.  And the API doesn't tell you which.
+                    # So until such time as we can API and determine this code-wise...
+                    $alarmname .= " (possibly 'Update available')";
+                }
+                # The rootFolder is known as 'Datacenters', which is somewhat confusing when presented as a nagios alarm.
+                # Converting to 'vCenter' for human sanity.
+                $rv_ref = [$type, ($aentity->name eq 'Datacenters') ? 'vCenter' : $aentity->name, $alarmname, $color, ];
             }
             push(@alarms, $rv_ref) if ($rv_ref);
         }
@@ -117,7 +125,7 @@ sub generate_final_message ($) {
     #
     # Input members can be:
     # String (print as-is, in order)
-    # arrayrefs of [type of thing alarming, name of thing alarming, alarm, coloe] that can be consilidated/compressed
+    # arrayrefs of [type of thing alarming, name of thing alarming, alarm, color] that can be consilidated/compressed
     my ($ref, ) = @_;
     my $message = '';
     if (scalar @{$ref} ) {
@@ -183,7 +191,7 @@ if ($deep_dive_for_alarms_flag) {
         # Hidden gotcha: Having status=0/OK and alarms=existing is a valid/declared OK
         # return from the root, because we might skip known alarms (like a host being
         # powered off).  This condition means you won't get in here: you found AN alarm,
-        # just that it's one the code says "it's cool to ignore".  This deep check 
+        # just that it's one the code says "it's cool to ignore".  This deep check
         # is mostly redundant and can get expensive (at a time when processing matters)
         # if things are really down and alarming at the root.
         # In that case, skip this: Fight the fire you know.
