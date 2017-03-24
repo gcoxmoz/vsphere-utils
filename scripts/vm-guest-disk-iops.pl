@@ -79,7 +79,7 @@ sub get_stats {
             my $groupInfo  = $metric->groupInfo->key;
             my $nameInfo   = $metric->nameInfo->key;
             my $rolluptype = $metric->rollupType->val;
-            my $vmwInternalName = $groupInfo . "." . $nameInfo . "." . $rolluptype;
+            my $vmwInternalName = $groupInfo . '.' . $nameInfo . '.' . $rolluptype;
             # ^ e.g. cpu.usage.average
             # Now, move along if this wasn't a metric we care about.
             next unless ($metrics{$vmwInternalName});
@@ -87,6 +87,7 @@ sub get_stats {
             my $metricId = PerfMetricId->new(counterId => $metric->key, instance => '*');
             push @metricIDs, $metricId;
         }
+        next unless (@metricIDs); # Make sure we found SOMETHING we wanted
         ###########################################################################
         #
         # Here is the code to do MORE stupid.  Here, let's look up the polling
@@ -107,10 +108,11 @@ sub get_stats {
         #     }
         # }
         # foreach (@$historical_intervals) {
-        #     ifc($_->samplingPeriod != -1) {
+        #     if ($_->samplingPeriod != -1) {
         #         push @intervals, $_->samplingPeriod;
         #     }
         # }
+        # # print $intervals[0]."\n";
         # my $pqs = PerfQuerySpec->new(entity => $vm, maxSample => 10, intervalId => shift(@$intervalIds), metricId => \@metricIDs);
         ###########################################################################
 
@@ -122,6 +124,7 @@ sub get_stats {
 
     if (scalar(@perfqueryspecs) == 0) {
         print "### Unable to find the desired metrics on any VMs.\n";
+        print "### You probably need to set your vCenter to collect metrics at a higher level.\n";
         exit 1;
     }
 
@@ -168,12 +171,14 @@ sub get_stats {
             my $perfValues = $metric->value;
             # This is a PerfMetricIntSeries[] of the values from the query
             # http://pubs.vmware.com/vsphere-60/topic/com.vmware.wssdk.apiref.doc/vim.PerformanceManager.IntSeries.html
-            # Note: we only did one query so this is a loop-over-1 here.
-            # For our purposes, since we're only querying virtualdisks,
-            # these are disk values, so I've jumped the variables right to that.
+            # Note: we only did one query so this is a loop-over-1 VM here.
+            # For our purposes, since we're only interested in virtualdisks,
+            # we need to get away from anything non-disk.
 
             foreach my $disk (sort { $a->id->instance cmp $b->id->instance } @$perfValues) {
-                my $diskname = $disk->id->instance;
+                my $diskname      = $disk->id->instance;
+                my $backing_store = $disks{$diskname};
+                next unless ($backing_store); # only disks would have gotten this set.
                 my $values   = $disk->value;
 
                 my $sum  = 0;
@@ -187,7 +192,7 @@ sub get_stats {
                 my $rollupType = $metricRef->rollupType->val;
 
                 my $internalID = $groupInfo . '.' . $nameInfo . '.' . $rollupType;
-                printf '%-'.$max_hostname_string.'s %-9s %-20s %-19s %6d'."\n", $vmname, $diskname, $disks{$diskname}, $nameInfo, $avg;
+                printf '%-'.$max_hostname_string.'s %-9s %-20s %-19s %6d'."\n", $vmname, $diskname, $backing_store, $nameInfo, $avg;
             }
         }
     }  # end of queryloop
