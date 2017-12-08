@@ -446,5 +446,12 @@
          "VirtualMachine.State.RemoveSnapshot",
          "VirtualMachine.State.RevertToSnapshot"
       ]
+   },
+   "stvn_backups" : {
+      "privs" : [
+         "VirtualMachine.State.CreateSnapshot",
+         "VirtualMachine.State.RemoveSnapshot",
+         "VirtualMachine.State.RenameSnapshot"
+      ]
    }
 }
