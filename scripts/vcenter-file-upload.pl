@@ -57,6 +57,7 @@ Util::connect();
 my $datacenter_refs = Vim::find_entity_views(view_type => 'Datacenter', filter => $datacenter ? { 'name' => $datacenter, } : {}, properties => ['name', 'datastore', ], );
 my @dc_morefs;
 foreach my $dc (@$datacenter_refs) {
+    next unless (defined($dc->datastore));
     foreach my $ds_ref (@{$dc->datastore}) {
         my $ds    = Vim::get_view( view_type => 'Datastore', mo_ref => $ds_ref, filter => { 'name' => $datastore, }, properties => ['name', ], );
         next if ($datastore ne $ds->name);
