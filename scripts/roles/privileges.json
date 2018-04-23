@@ -7,6 +7,21 @@
          "System.View"
       ]
    },
+   "just-console-things" : {
+      "comment" : "The 'Virtual Machine console user' that seems autodeployed in 6.5?",
+      "privs" : [
+         "VirtualMachine.Interact.AnswerQuestion",
+         "VirtualMachine.Interact.ConsoleInteract",
+         "VirtualMachine.Interact.DeviceConnection",
+         "VirtualMachine.Interact.PowerOff",
+         "VirtualMachine.Interact.PowerOn",
+         "VirtualMachine.Interact.Reset",
+         "VirtualMachine.Interact.SetCDMedia",
+         "VirtualMachine.Interact.SetFloppyMedia",
+         "VirtualMachine.Interact.Suspend",
+         "VirtualMachine.Interact.ToolsInstall"
+      ]
+   },
    "baseline" : {
       "comment" : "baseline is 'I trust everyone' level.  This is allowing someone as much power as if they had access to a physical version of the VM.  You might want to cull here.",
       "privs" : [

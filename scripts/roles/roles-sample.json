@@ -1,4 +1,10 @@
 {
+   "VirtualMachineConsoleUser" : {
+      "privsets" : [
+         "nonhuman_basics",
+         "just-console-things"
+      ]
+   },
    "Non-VMadmin Sysadmins" : {
       "privsets" : [
          "baseline"
