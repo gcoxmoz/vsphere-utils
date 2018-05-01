@@ -16,19 +16,26 @@ $Util::script_version = '1.0';
 #
 # Secondary thing:
 # NetApp's Virtual Storage Console can sometimes blow up and leave behind snapshots, smvi_something, EVERYWHERE
-# With a --cleanup, we can quickly clear out these orphan snapshots once you see them.
+# With a '--cleanup smvi', we can quickly clear out these orphan snapshots once you see them.
 #
 
 my %opts = (
-  'cleanup-smvi' => { type => "",   help => 'Run an actual cleanup', required => 0},
-  );
+    'cleanup' => { type => '=s',   help => 'Run an actual cleanup of snaps starting with X', required => 0},
+);
 
 # read/validate options and connect to the server
 Opts::add_options(%opts);
 Opts::parse();
 Opts::validate();
 
-my $do_cleanup_flag = Opts::get_option('cleanup-smvi') && 1;
+my $do_cleanup = undef;
+if (Opts::get_option('cleanup')) {
+    $do_cleanup = Opts::get_option('cleanup');
+    if (length($do_cleanup) < 2) {
+        print "For safety's sake, the snapshot to delete must have a longer character length.\n";
+        exit 1;
+    }
+}
 
 # connect to the server
 Util::connect(); #print "Server Connected\n";
@@ -43,25 +50,25 @@ sub get_all_vms {
     if (!$vms) { print "Search for VMs failed.\n"; return (); }
     if (!(scalar @{$vms})) { print "Found no VMs.\n"; return (); }
     foreach my $vm (@{$vms}) {
-      next if ($vm->get_property('config.template') eq 'true');   # templates don't participate in name matches
-      push @vms, $vm;
+        next if ($vm->get_property('config.template') eq 'true');   # templates don't participate in name matches
+        push @vms, $vm;
     }
     return @vms;
 }
 
 sub searchSnapshots {
-  my @vms = @_;
-  print "# Use --cleanup-smvi to clean up any smvi snapshots\n" if (!$do_cleanup_flag);
-  foreach my $vm (sort { $a->name cmp $b->name } @vms) {
-    my $vm_name = $vm->name;
-    if ($vm->snapshot) {
-      print "### $vm_name has snapshots.\n";
+    my @vms = @_;
+    print "# Use --cleanup=smvi to clean up any smvi snapshots\n" if (!$do_cleanup);
+    foreach my $vm (sort { $a->name cmp $b->name } @vms) {
+        my $vm_name = $vm->name;
+        if ($vm->snapshot) {
+            print "### $vm_name has snapshots.\n";
 
-      foreach (@{$vm->snapshot->rootSnapshotList}) {
-        printSnaps($_, 2);
-      }
+            foreach (@{$vm->snapshot->rootSnapshotList}) {
+                printSnaps($_, 2);
+            }
+        }
     }
-  }
 }
 
 sub printSnaps {
@@ -73,24 +80,24 @@ sub printSnaps {
     # recurse through the tree of snaps
     if ($snapshotTree->childSnapshotList) {
     # loop through any children that may exist
-      foreach (@{$snapshotTree->childSnapshotList}) {
-        printSnaps($_, $indent + 2);
-      }
+        foreach (@{$snapshotTree->childSnapshotList}) {
+            printSnaps($_, $indent + 2);
+        }
     }
 
-    if ($do_cleanup_flag) {
-      if ($snapshotTree->name !~ m#^smvi#) {
-        print 'Not offering the deletion of snapshot "'.$snapshotTree->name."\".\n";
-      } else {
-        print 'Delete snapshot "'.$snapshotTree->name.'" ? [y/N] ';
-        my $input = <STDIN>;
-        chomp $input;
-        if ($input =~ m/^[Y]$/i){ #match Y or y
-          my $snapshot = Vim::get_view(mo_ref => $snapshotTree->snapshot);
-          $snapshot->RemoveSnapshot_Task(removeChildren => 'false');
+    if ($do_cleanup) {
+        if ($snapshotTree->name !~ m#^$do_cleanup#) {
+            print 'Not offering the deletion of snapshot "'.$snapshotTree->name."\".\n";
         } else {
-          print 'Skipping "'.$snapshotTree->name."\"\n";
+            print 'Delete snapshot "'.$snapshotTree->name.'" ? [y/N] ';
+            my $input = <STDIN>;
+            chomp $input;
+            if ($input =~ m/^[Y]$/i){ #match Y or y
+                my $snapshot = Vim::get_view(mo_ref => $snapshotTree->snapshot);
+                $snapshot->RemoveSnapshot_Task(removeChildren => 'false');
+            } else {
+                print 'Skipping "'.$snapshotTree->name."\"\n";
+            }
         }
-      }
     }
 }
