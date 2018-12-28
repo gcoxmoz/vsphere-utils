@@ -1,0 +1,24 @@
+# This naively forces an install attempt into /usr/bin rather than into
+# the BUILDROOT.  Force it over.  It's not like we pick it up anyway, though.
+--- Makefile.PL 2011-05-18 09:49:56.718262000 +1000
++++ Makefile.PL 2011-05-18 09:51:21.666953000 +1000
+@@ -84,18 +84,10 @@
+    macro              => {
+      # vmware apps
+      INST_VMWARE_APPS => 'apps',
+-     DEST_VMWARE_APPS => (
+-       $Config{perlpath} eq '/usr/bin/perl' ?
+-         '/usr/lib/vmware-viperl/apps' :
+-         '$(INSTALLSITESCRIPT)/apps'
+-     ),
++     DEST_VMWARE_APPS => '$(DESTDIR)$(INSTALLVENDORSCRIPT)/apps',
+      # vmware docs
+      INST_VMWARE_DOC => 'doc',
+-     DEST_VMWARE_DOC => (
+-       $Config{perlpath} eq '/usr/bin/perl' ?
+-         '/usr/share/doc/vmware-viperl/doc' :
+-         '$(SITEPREFIX)/doc'
+-     ),
++     DEST_VMWARE_DOC => '$(DESTDIR)$(INSTALLVENDORSCRIPT)/doc',
+    },
+ );
