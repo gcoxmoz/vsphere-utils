@@ -153,24 +153,33 @@ sub generate_final_message ($) {
                 }
             }
         }
-        my @bundle = ();
+        my @short_bundle = ();
+        my @long_bundle = ();
         foreach my $item (@{$ref}) {
             if (ref($item) eq '') {
                 # string, pass-through
-                push @bundle, $item;
+                push @short_bundle, $item;
+                push @long_bundle, $item;
             } elsif (ref($item) eq 'ARRAY') {
                 # If the alarm is in alarm_analysis, we have N instances of one alarm type.
                 # Skip the individual alarm, as we've reported it in a rollup line above.
                 next if ($alarm_analysis{$item->[0]}{$item->[2]});
                 # Otherwise, low alarm count, tell the truth.
-                my $str = '['.$item->[1].'] '.$item->[2];
-                push @bundle, $str;
+                my $long_host = $item->[1];
+                my $long_str = '['.$long_host.'] '.$item->[2];
+                push @long_bundle, $long_str;
+                (my $short_host = $item->[1]) =~ s#\..*$##;
+                my $short_str = '['.$short_host.'] '.$item->[2];
+                push @short_bundle, $short_str;
             } else {
                 print 'UNKNOWN: Bad reference pass-though: '.ref($item)."\n";
                 exit 3;
             }
         }
-        $message = $status_words{$statuscode} .': '. join("\n", @bundle);  # Here we blindly hope this doesn't go over 4k.
+        my $main_output = $status_words{$statuscode} .': '. join(' ', @short_bundle);
+        my $extended_message = join("\n", @long_bundle);
+        # Here we blindly hope this doesn't go over 4k:
+        $message = $main_output . "\n" . $extended_message . "\n";
     } else {
         $message = 'OK: No alarms found.';
     }
